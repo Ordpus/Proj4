@@ -6,7 +6,6 @@
 #include <unistd.h>
 
 void* phonecall(void* argp);
-void change_connected(int connected, int change, sem_t lock);
 
 int main(void) {
   pthread_t callers[20];
@@ -21,7 +20,7 @@ int main(void) {
 }
 
 void* phonecall(void* argp) {
-	long id = (long) argp;
+    long id = (long) argp;
     static int NUM_OPERATORS = 3;
     static int NUM_LINES = 5;
     static int connected = 0;    // Callers that are connected
@@ -45,21 +44,15 @@ void* phonecall(void* argp) {
     }
     while(connected >= NUM_LINES);
     printf("Thread [%ld] has available line, call ringing\n", id);
-	connected += 1;
+    connected += 1;
     sem_post(&connected_lock);
     sem_wait(&operators);
     printf("Thread [%ld] is speaking to operator\n", id);
     sleep(3);
     printf("Thread [%ld] has bought a ticket!\n", id);
     printf("Thread [%ld] has hung up!\n", id);
-	connected -= 1;
+    connected -= 1;
     sem_post(&operators);
     pthread_exit(NULL);
     return NULL;
-}
-
-void change_connected(int connected, int change, sem_t lock) {
-  sem_wait(&lock);
-  *&connected += change;
-  sem_post(&lock);
 }
